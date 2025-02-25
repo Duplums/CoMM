@@ -1,0 +1,7 @@
+name: BLIP2
+
+model:
+  _target_: pl_modules.blip2.Blip2
+
+
+

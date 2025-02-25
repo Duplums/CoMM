@@ -1,0 +1,40 @@
+name: SLIP
+
+model:
+  _target_: pl_modules.slip.SLIP
+
+  visual: # Vision model to be trained
+    _target_: timm.create_model
+    model_name: resnet50 #Checkout https://timm.fast.ai/models
+    num_classes: 0 # Remove final classifier
+
+  language: # Language model to be trained
+    _target_: models.transformer.LanguageEncoder
+    model_name: clip-ViT-B-32-multilingual-v1
+    freeze: false
+    output_value: "sentence_embedding"
+    normalize_embeddings: true
+    use_dataset_cache: false
+
+  image_projection: null # Visual projection
+#    _target_: torch.nn.Linear
+#    in_features: 2048 # Visual encoder dimension
+#    out_features: 512 # Output dimension
+#    bias: False
+
+  text_projection: null # Language projection
+#    _target_: torch.nn.Linear
+#    in_features: 512
+#    out_features: 512
+#    bias: False
+
+  visual_projection: # Projection head
+    _target_: pl_modules.simclr.Siamese._build_mlp
+    in_dim: 2048 # Visual encoder dimension
+    mlp_dim: 4096 # Hidden dim of MLP projection head
+    out_dim: 256 # Output embed dim of MLP projection head
+
+  loss_kwargs: # CLIP + InfoNCE
+    temperature: 0.1 # Temperature in InfoNCE loss
+    ssl_scale: 1 # scale between clip and ssl losses
+

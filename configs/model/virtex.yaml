@@ -1,0 +1,8 @@
+name: VirTex
+
+model:
+  _target_: pl_modules.virtex.VirTex
+  optim_kwargs: null
+
+
+

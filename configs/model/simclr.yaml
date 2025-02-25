@@ -1,0 +1,19 @@
+name: SimCLR
+
+model:
+  _target_: pl_modules.simclr.SimCLR
+  visual: # Vision model to be trained
+    _target_: timm.create_model
+    model_name: resnet50 #Checkout https://timm.fast.ai/models
+    num_classes: 0 # Remove final classifier
+
+  visual_projection: # Projection head
+    _target_: pl_modules.simclr.Siamese._build_mlp
+    in_dim: 2048 # Visual encoder dimension
+    mlp_dim: 4096 # Hidden dim of MLP projection head
+    out_dim: 256 # Output embed dim of MLP projection head
+
+  loss_kwargs: # InfoNCE
+    temperature: 0.1 # Temperature in the objective function
+
+

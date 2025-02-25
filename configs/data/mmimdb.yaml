@@ -1,0 +1,7 @@
+name: "mmimdb"
+
+data_module:
+  _target_: dataset.mmimdb.MMIMDBDataModule
+  batch_size: 64
+  num_workers: 20
+

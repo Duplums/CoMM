@@ -1,0 +1,9 @@
+name: "img_caption"
+
+data_module:
+  _target_: dataset.img_caption.ImageCaptionDataModule
+  dataset: "coco"
+  batch_size: 128
+  num_workers: 16
+
+

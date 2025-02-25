@@ -1,0 +1,8 @@
+name: CMC
+
+model:
+  _target_: pl_modules.cmc.CMC
+  encoders: null # Encoders for each modality (to be set)
+  loss_kwargs: # InfoNCE
+      temperature: 0.1 # Temperature
+

@@ -1,0 +1,7 @@
+name: "hateful_memes"
+
+data_module:
+  _target_: dataset.hateful_memes.HatefulMemesDataModule
+  batch_size: 64
+  num_workers: 20
+

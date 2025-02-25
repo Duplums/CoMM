@@ -1,0 +1,22 @@
+name: CoMM
+
+model:
+  _target_: pl_modules.comm.CoMM
+  encoder: # Multi-modal model to be trained
+    _target_: models.mmfusion.MMFusion
+    embed_dim: 40
+    fusion: "concat"
+    pool: "cls"
+    n_heads: 8
+    n_layers: 1
+    add_bias_kv: False
+    dropout: 0
+
+  projection: # Projection head
+    _target_: pl_modules.comm.CoMM._build_mlp
+    in_dim: ${model.model.encoder.embed_dim} # MM encoder dimension
+    mlp_dim: 512 # Hidden dim of MLP projection head
+    out_dim: 256 # Output embed dim of MLP projection head
+
+  loss_kwargs: # CoMM loss
+    temperature: 0.1 # Temperature in the objective function

@@ -1,0 +1,268 @@
+defaults:
+  - _self_
+  - data: multibench
+  - model: comm
+
+seed: 42
+mode: "train"
+
+trainer:
+  _target_: pytorch_lightning.Trainer
+  accelerator: "auto" # Accelerator given to pytorch-lightning Trainer (eg `cpu` or `gpu`)
+  strategy: "ddp_find_unused_parameters_true"
+  devices: "auto"
+  num_nodes: 1 # Number of distributed nodes
+  max_epochs: 100
+  default_root_dir: "."
+  use_distributed_sampler: false
+  deterministic: false
+  inference_mode: false # avoid weird bugs during linear probing
+
+linear_probing:
+  _target_: evaluation.linear_probe.LinearProbingCallback
+  use_sklearn: false
+  fastsearch: false
+  logging_level: "INFO"
+  frequency: "by_epoch"
+
+optim:
+  lr: 1e-4
+  weight_decay: 1e-2
+
+
+visionandtouch: # Image + Force + Proprioception to predict proprioception (regression) => too easy task
+  modalities:
+    - "image"
+    - "force"
+    - "proprio"
+  task: "ee_yaw_next"
+  kwargs: # augmentations to apply
+    augmentations:
+      - "simclr"
+      - "noise+drop"
+      - "noise"
+  encoders:
+    - _target_: timm.create_model # Image encoder
+      model_name: resnet18
+      pretrained: false
+      num_classes: 0
+      global_pool: ''
+    - _target_: models.robotics.ForceEncoder
+      z_dim: 512
+    - _target_: models.robotics.ProprioEncoder
+      z_dim: 512
+  adapters:
+    - _target_: models.input_adapters.PatchedInputAdapter
+      num_channels: 512 # nb of feature maps
+      stride_level: 1
+      patch_size_full: 1
+      dim_tokens: 512
+      image_size: 4 # size of feature maps
+    - _target_: models.input_adapters.SimpleFeaturesInputAdapter
+    - _target_: models.input_adapters.SimpleFeaturesInputAdapter
+
+  # CMC projectors
+  cmc_heads:
+    - _target_: torch.nn.Linear
+      in_features: 512
+      out_features: 256
+      bias: False
+    - _target_: torch.nn.Linear
+      in_features: 128
+      out_features: 256
+      bias: False
+    - _target_: torch.nn.Linear
+      in_features: 512
+      out_features: 256
+      bias: False
+
+
+visionandtouch-bin: # Image + Force + Proprioception to predict contact (binary task) => harder task
+  modalities:
+    - "image"
+    - "force"
+    - "proprio"
+  task: "contact_next"
+  kwargs: # augmentations to apply
+    augmentations:
+      - "simclr"
+      - "noise+drop"
+      - "noise"
+  encoders:
+    - _target_: timm.create_model # Image encoder
+      model_name: resnet18
+      pretrained: false
+      num_classes: 0
+      global_pool: ''
+    - _target_: models.robotics.ForceEncoder
+      z_dim: 512
+    - _target_: models.robotics.ProprioEncoder
+      z_dim: 512
+  adapters:
+    - _target_: models.input_adapters.PatchedInputAdapter
+      num_channels: 512 # nb of feature maps
+      stride_level: 1
+      patch_size_full: 1
+      dim_tokens: 512
+      image_size: 4 # size of feature maps
+    - _target_: models.input_adapters.SimpleFeaturesInputAdapter
+    - _target_: models.input_adapters.SimpleFeaturesInputAdapter
+
+  # CMC projectors
+  cmc_heads:
+    - _target_: torch.nn.Linear
+      in_features: 512
+      out_features: 256
+      bias: False
+    - _target_: torch.nn.Linear
+      in_features: 128
+      out_features: 256
+      bias: False
+    - _target_: torch.nn.Linear
+      in_features: 512
+      out_features: 256
+      bias: False
+
+mosi:
+  modalities:
+    - "vision"
+    - "text"
+    - "audio"
+  task: "classification"
+  kwargs: # augmentations to apply
+    augmentations: "drop+noise"
+  encoders:
+    - _target_: models.transformer.Transformer
+      n_features: 20 # !! according to MultiBench but not in FactorCL
+      dim: 40
+      max_seq_length: 50
+      positional_encoding: false
+    - _target_: models.transformer.Transformer
+      n_features: 300
+      dim: 40 # !! according to FactorCL paper but not in FactorCL implementation (==600)
+      max_seq_length: 50
+      positional_encoding: false
+    - _target_: models.transformer.Transformer
+      n_features: 5
+      dim: 40
+      max_seq_length: 50
+      positional_encoding: false
+  adapters: # not required
+    - null
+    - null
+    - null
+
+mosei:
+  modalities:
+    - "vision"
+    - "text"
+    - "audio"
+  task: "classification"
+  kwargs: # augmentations to apply
+    augmentations: "drop+noise"
+  encoders:
+    - _target_: models.transformer.Transformer
+      n_features: 35
+      dim: 40
+      max_seq_length: 50
+      positional_encoding: false
+    - _target_: models.transformer.Transformer
+      n_features: 300
+      dim: 40
+      max_seq_length: 50
+      positional_encoding: false
+    - _target_: models.transformer.Transformer
+      n_features: 74
+      dim: 40
+      max_seq_length: 50
+      positional_encoding: false
+  adapters: # not required
+    - null
+    - null
+    - null
+
+humor:
+  modalities:
+    - "vision"
+    - "text"
+    - "audio"
+  task: "classification"
+  kwargs: # augmentations to apply
+    augmentations: "drop+noise"
+  encoders:
+    - _target_: models.transformer.Transformer
+      n_features: 371
+      dim: 40
+      max_seq_length: 50
+      positional_encoding: false
+    - _target_: models.transformer.Transformer
+      n_features: 300
+      dim: 40
+      max_seq_length: 50
+      positional_encoding: false
+    - _target_: models.transformer.Transformer
+      n_features: 81
+      dim: 40
+      max_seq_length: 50
+      positional_encoding: false
+  adapters: # not required
+    - null
+    - null
+    - null
+  # CMC projectors
+  cmc_heads:
+    - _target_: torch.nn.Linear
+      in_features: 40
+      out_features: 13
+      bias: False
+    - _target_: torch.nn.Linear
+      in_features: 40
+      out_features: 13
+      bias: False
+    - _target_: torch.nn.Linear
+      in_features: 40
+      out_features: 13
+      bias: False
+
+sarcasm:
+  modalities:
+    - "vision"
+    - "text"
+    - "audio"
+  task: "classification"
+  kwargs: # augmentations to apply
+    augmentations: "drop+noise"
+  encoders:
+    - _target_: models.transformer.Transformer
+      n_features: 371
+      dim: 40
+      max_seq_length: 50
+      positional_encoding: false
+    - _target_: models.transformer.Transformer
+      n_features: 300
+      dim: 40
+      max_seq_length: 50
+      positional_encoding: false
+    - _target_: models.transformer.Transformer
+      n_features: 81
+      dim: 40
+      max_seq_length: 50
+      positional_encoding: false
+  adapters: # not required
+    - null
+    - null
+    - null
+  # CMC projectors
+  cmc_heads:
+    - _target_: torch.nn.Linear
+      in_features: 40
+      out_features: 13
+      bias: False
+    - _target_: torch.nn.Linear
+      in_features: 40
+      out_features: 13
+      bias: False
+    - _target_: torch.nn.Linear
+      in_features: 40
+      out_features: 13
+      bias: False

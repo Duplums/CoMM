@@ -1,0 +1,55 @@
+seed: 42
+mode: "train"
+
+
+trainer:
+  _target_: pytorch_lightning.Trainer
+  accelerator: "auto" # Accelerator given to pytorch-lightning Trainer (eg `cpu` or `gpu`)
+  strategy: "ddp"
+  devices: "auto"
+  num_nodes: 1 # Number of distributed nodes
+  max_epochs: 100
+  default_root_dir: "."
+  use_distributed_sampler: false
+  deterministic: false
+  check_val_every_n_epoch: 1
+  num_sanity_val_steps: 0 # disable sanity check
+  inference_mode: false # avoid weird bugs during linear probing
+
+# linear probing
+downstream_datasets: ["cifar10", "cifar100", "cub200", "cars", "food101", "sun397", "aircraft", "dtd", "pets", "caltech101", "flowers", "stl10", "eurosat", "resisc45", "patch_camelyon"]
+
+optim:
+  lr: 1e-3
+  weight_decay: 0.01
+  lr_scheduler:
+    final_value: 1e-6
+    epochs: ${trainer.max_epochs}
+    warmup_epochs: 10
+    start_warmup_value: 1e-6
+
+# Define default visual + textual encoders for image-caption dataset
+coco:
+  modalities:
+    - "vision"
+    - "text"
+  encoders:
+    - _target_: timm.create_model # Resnet50 encoder
+      model_name: resnet50
+      pretrained: false
+      num_classes: 0
+      global_pool: '' # returns features from the last layer before pooling
+    - _target_: models.transformer.LanguageEncoder # CLIP text encoder
+      model_name: clip-ViT-B-32-multilingual-v1
+      freeze: true
+      output_value: "token_embeddings"
+      normalize_embeddings: true
+      use_dataset_cache: false
+  adapters:
+    - _target_: models.input_adapters.PatchedInputAdapter
+      num_channels: 2048 # nb of feature maps
+      stride_level: 1
+      patch_size_full: 1
+      dim_tokens: 768
+      image_size: 7 # size of feature maps
+    - null

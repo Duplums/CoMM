@@ -1,0 +1,52 @@
+seed: 42
+mode: "train"
+
+trainer:
+  _target_: pytorch_lightning.Trainer
+  accelerator: "auto" # Accelerator given to pytorch-lightning Trainer (eg `cpu` or `gpu`)
+  strategy: 'ddp_find_unused_parameters_true'
+  devices: "auto"
+  num_nodes: 1 # Number of distributed nodes
+  max_epochs: 100
+  default_root_dir: "."
+  use_distributed_sampler: false
+  deterministic: false
+  check_val_every_n_epoch: 1
+  num_sanity_val_steps: 0 # disable sanity check
+  inference_mode: false # avoid weird bugs during linear probing
+
+linear_probing:
+  _target_: evaluation.linear_probe.LinearProbingCallback
+  logging_level: "INFO"
+  frequency: "by_epoch"
+  val_loaders: false # no validation set here
+
+optim:
+  lr: 1e-4
+  weight_decay: 0.01
+  lr_scheduler:
+    final_value: 1e-6
+    epochs: ${trainer.max_epochs}
+    warmup_epochs: 10
+    start_warmup_value: 1e-6
+
+# Define default visual + textual encoders for Hateful Memes dataset
+hateful_memes:
+  modalities:
+    - "vision"
+    - "text"
+  encoders:
+    - _target_: models.vit.VisionTransformer # CLIP pre-trained ViT
+      model_name: vit_base_patch32_clip_224.openai
+      pretrained: true
+      output_value: "token_embeddings"
+      freeze: true
+    - _target_: models.transformer.LanguageEncoder # CLIP pre-trained text encoder
+      model_name: clip-ViT-B-32-multilingual-v1 # pre-trained model (frozen)
+      output_value: 'token_embeddings'
+      normalize_embeddings: true
+      use_dataset_cache: false
+      freeze: true
+  adapters:
+    - null
+    - null

@@ -1,0 +1,14 @@
+name: "trifeatures"
+
+data_module:
+  _target_: dataset.trifeatures.TrifeaturesDataModule
+  dataset: "bimodal"
+  batch_size: 64
+  num_workers: 16
+  max_size: 1e4
+  share_attr: "shape"
+  unique_attr: "texture"
+  synergy_attr: ["texture","color"]
+  seed: 42
+
+

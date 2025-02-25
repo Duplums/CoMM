@@ -1,0 +1,7 @@
+name: SupervisedClassifier
+
+model:
+  _target_: pl_modules.supervised.SupervisedClassifier
+  ckpt_path: null # to specify
+  num_classes: 2
+  model: "supcon"

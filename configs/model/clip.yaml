@@ -1,0 +1,31 @@
+name: CLIP
+
+model:
+  _target_: pl_modules.clip.CLIP
+
+  visual: # Vision model to be trained
+    _target_: timm.create_model
+    model_name: vit_base_patch32_clip_224.openai
+    pretrained: true
+
+  language: # Language model to be trained
+    _target_: models.transformer.LanguageEncoder
+    model_name: clip-ViT-B-32-multilingual-v1
+    freeze: false
+    output_value: "sentence_embedding"
+    normalize_embeddings: true
+    use_dataset_cache: false
+
+  image_projection: null # Visual projection
+#    _target_: torch.nn.Linear
+#    in_features: 2048 # Visual encoder dimension
+#    out_features: 512 # Output dimension
+#    bias: False
+
+  text_projection: null # Language projection
+#    _target_: torch.nn.Linear
+#    in_features: 512
+#    out_features: 512
+#    bias: False
+
+

@@ -1,0 +1,8 @@
+name: "multibench"
+
+data_module:
+  _target_: dataset.multibench.MultiBenchDataModule
+  dataset: "mimic"
+  batch_size: 64
+  num_workers: 16
+

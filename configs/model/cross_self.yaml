@@ -1,0 +1,13 @@
+name: CrossSelf
+
+model:
+  _target_: pl_modules.cross_self.CrossSelf
+  enc1: null # Encodeur modality 1 (to set)
+  enc2: null # Encodeur modality 2 (to set)
+  head1: null
+  head2: null
+  loss_kwargs: # CLIP + InfoNCE
+      temperature: 0.1 # Temperature in InfoNCE loss
+      ssl_scale: 1 # scale between clip and ssl losses
+
+
