@@ -17,7 +17,7 @@ class MIMIC(Dataset):
     """
     def __init__(self, data_path: str = "im.pk",
                  split: str = "train",
-                 task: int = -1,
+                 task: int = 7,
                  modalities: Union[str, Tuple[str]] = ("tabular", "timeseries"),
                  flatten_time_series: bool = False,
                  transform_timeseries: Optional[Callable] = None,

@@ -26,6 +26,7 @@ This repository contains different Jupyter notebooks to reproduce the experiment
 |----------|------------|
 | [trifeatures.ipynb](demo/trifeatures.ipynb) | Controlled experiments on synthetic bimodal Trifeatures |
 | [multibench.ipynb](demo/multibench.ipynb) | Real-world MultiBench experiments |
+| [multibench_mimic.ipynb](demo/multibench_mimic.ipynb) | MIMIC experiments (require credentials) |
 | [mmimdb.ipynb](demo/mmimdb.ipynb) | Text-Image MM-IMDb experiments  |
 | [trimodal.ipynb](demo/trimodal.ipynb) | Vision&Touch experiments with 3 modalities |
 
