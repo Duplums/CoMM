@@ -66,7 +66,9 @@ def main(cfg: DictConfig):
         cfg.trainer,
         default_root_dir = build_root_dir(cfg),
         logger=[TensorBoardLogger(build_root_dir(cfg), name="logs")],
-        callbacks=[instantiate(cfg.linear_probing, downstream_data_modules=[downstream_data_module], names=[dataset])]
+        callbacks=[instantiate(cfg.linear_probing_reg if cfg.data.data_module.dataset == "visionandtouch" \
+                               else cfg.linear_probing, 
+                               downstream_data_modules=[downstream_data_module], names=[dataset])]
     )
 
     if cfg.mode == "train":

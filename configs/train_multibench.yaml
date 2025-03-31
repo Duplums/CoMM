@@ -26,6 +26,11 @@ linear_probing:
   logging_level: "INFO"
   frequency: "by_epoch"
 
+linear_probing_reg:
+  _target_: evaluation.linear_probe_reg.LinearProbingRegCallback
+  use_sklearn: true
+  logging_level: "INFO"
+  frequency: "by_epoch"
 
 optim:
   lr: 1e-3
@@ -46,6 +51,7 @@ visionandtouch: # Image + Force to predict proprioception (regression task)
       model_name: resnet18
       pretrained: false
       num_classes: 0
+      global_pool: ''
     - _target_: models.robotics.ForceEncoder
       z_dim: 128
 
@@ -100,6 +106,7 @@ visionandtouch-bin: # Image + Proprioception to predict contact (binary task)
       model_name: resnet18
       pretrained: false
       num_classes: 0
+      global_pool: ''
     - _target_: models.robotics.ProprioEncoder
       z_dim: 512
 
