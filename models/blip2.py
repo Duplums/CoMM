@@ -58,7 +58,7 @@ class Blip2LanguageTransformer(nn.Module):
     def forward(self, x: List[str]):
         text = self.model.tokenizer(x, return_tensors="pt",
                                     padding=True, truncation=True).to(self.model.device)
-        text["inputs_ids"] = self.mask(text["input_ids"]).to(self.model.device)
+        text["input_ids"] = self.mask(text["input_ids"]).to(self.model.device)
 
         # return text features
         with torch.no_grad():
